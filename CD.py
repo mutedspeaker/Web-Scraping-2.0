@@ -26,19 +26,15 @@ def soupExtract(site, keyword, page, filtertherev, brand=0):
         # the exception is due, to high traffic in Amazon Website, it is quite possible to not get our html request in the first time
         except Exception:
             print("r", end=" ")
-    a = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span')
-    name = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span',
-                                                                                    class_='a-size-base-plus a-color-base a-text-normal')
-    price = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span', class_='a-price-whole')
-    rating = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span', class_='a-icon-alt')
-    reviews = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span',
-                                                                                       class_='a-size-base s-underline-text')
-    beforeprice = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span',
-                                                                                           class_='a-price a-text-price')
-    weightPerGram = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span',
-                                                                                             class_='a-size-base a-color-secondary')
-    delivery = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span',
-                                                                                        class_='a-color-base a-text-bold')
+    class_str = 'rush-component s-latency-cf-section'
+    a = soup.find('span', class_=class_str).find_all('span')
+    name = soup.find('span', class_=class_str).find_all('span', class_='a-size-base-plus a-color-base a-text-normal')
+    price = soup.find('span', class_=class_str).find_all('span', class_='a-price-whole')
+    rating = soup.find('span', class_=class_str).find_all('span', class_='a-icon-alt')
+    reviews = soup.find('span', class_=class_str).find_all('span', class_='a-size-base s-underline-text')
+    beforeprice = soup.find('span', class_=class_str).find_all('span', class_='a-price a-text-price')
+    weightPerGram = soup.find('span', class_=class_str).find_all('span', class_='a-size-base a-color-secondary')
+    delivery = soup.find('span', class_=class_str).find_all('span', class_='a-color-base a-text-bold')
     print(url)
     rdt = [["Platform", "Date", "Category", "Brand name", "Product Name", "Rating", "Reviews", "Discount", "Size",
             "Price/g", "Keyword", "Actual price", "Offer price", "Delivery Date"]]
