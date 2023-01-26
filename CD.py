@@ -5,8 +5,10 @@ import datetime
 import pandas as pd
 import re as rrr
 
-
 # an amazon tailored soup extracting function
+print("r stands for retrying as the amazon site has a huge traffic so multiple tries are required.")
+print("r is being printed for the sole benefit of the user, as it keeps him notified as to what is happening.")
+
 
 def soupExtract(site, keyword, page, filtertherev, brand=0):
     ftav = filtertherev
@@ -23,7 +25,7 @@ def soupExtract(site, keyword, page, filtertherev, brand=0):
 
         # the exception is due, to high traffic in Amazon Website, it is quite possible to not get our html request in the first time
         except Exception:
-            print("r...", end=" ")
+            print("r", end=" ")
     a = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span')
     name = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span',
                                                                                     class_='a-size-base-plus a-color-base a-text-normal')
@@ -38,56 +40,56 @@ def soupExtract(site, keyword, page, filtertherev, brand=0):
     delivery = soup.find('span', class_='rush-component s-latency-cf-section').find_all('span',
                                                                                         class_='a-color-base a-text-bold')
     print(url)
-    rdt = []
-    rdt.append(["Platform", "Date", "Category", "Brand name", "Product Name", "Rating", "Reviews", "Discount", "Size",
-                "Price/g", "Keyword", "Actual price", "Offer price", "Delivery Date"])
+    rdt = [["Platform", "Date", "Category", "Brand name", "Product Name", "Rating", "Reviews", "Discount", "Size",
+            "Price/g", "Keyword", "Actual price", "Offer price", "Delivery Date"]]
 
-    for i in range(len(name)):
-        if page == 7 & i == 10:
+    for _ in range(len(name)):
+        if page == 7 & _ == 10:
             break
         try:
             pl = 'Amazon'
             dt = datetime.datetime.now().strftime("%x")
-            bn = name[i].text.split()[0]
-            n = " ".join(name[i].text.split()[:-1])
-            n = name[i].text.split(',')[0]
+            bn = name[_].text.split()[0]
+            n = " ".join(name[_].text.split()[:-1])
+            n = name[_].text.split(',')[0]
             # n = name[i].text
-            r = float(rating[i].text.split()[0].replace(',', ''))
-            re = int(reviews[i].text.replace(',', ''))
+            r = float(rating[_].text.split()[0].replace(',', ''))
+            re = int(reviews[_].text.replace(',', '')[1:-2])
             # discount
-            si = name[i].text.split()[-1]
+            si = name[_].text.split()[-1]
             try:
-                si = rrr.search("([0-9]{1,10})\.{0,1}[0-9]*\s{0,3}(g)", name[i].text).group()
+                si = rrr.search("([0-9]{1,10})\.{0,1}[0-9]*\s{0,3}(g)", name[_].text).group()
             except:
                 si = ""
             # si = rrr.find("[0-9]*/.{0,1}[0-9]*/s{0,3}(g)", name[i].text)
-            wpg = weightPerGram[i].text
+            wpg = weightPerGram[_].text
             k = keyword
-            b = float(beforeprice[i].text.split('₹')[1].replace(',', ''))
-            p = float(price[i].text.replace(',', ''))
-            de = delivery[i].text
+            b = float(beforeprice[_].text.split('₹')[1].replace(',', ''))
+            p = float(price[_].text.replace(',', ''))
+            de = delivery[_].text
             di = b - p
             di = di / b
             di = di * 100
             di = round(di, 2)
-            if di > 0 :
+            if di > 0:
                 di = str(di) + "%"
             else:
                 di = ""
                 b = ""
             # di = str(di) + "%"
             # keyword
-            if fta:
-                if k.lower() not in name[i].text.lower():
+            if ftav:
+                # print(k, name[i].text)
+                # if k.lower() not in name[i].text.lower():
+                # #     continue
+                # print(brand.lower(), bn.lower())
+                if brand.lower() not in bn.lower():
                     continue
-            if (brand != 0) & (bn != brand):
-                continue
-            rdt.append([pl, dt, k, bn, n, r, re, di, si, wpg, b, p, de, page, i + 1])
-            sheet.append([pl, dt, k, bn, n, r, re, di, si, wpg, b, p, de, page, i + 1])
+            rdt.append([pl, dt, k, bn, n, r, re, di, si, wpg, b, p, de, page, _ + 1])
+            sheet.append([pl, dt, k, bn, n, r, re, di, si, wpg, b, p, de, page, _ + 1])
 
         except:
             pass
-
 
     pager = soup.find('span', {'class': 's-pagination-strip'})
 
@@ -148,17 +150,21 @@ for i in arr:
     if type(i[0]) == str:
         keywords.append(i[0])
 for i in be:
+    print(i)
     if type(i[0]) == str:
         bea.append(i[0])
 
 for i in ft:
     if type(i[0]) == str:
         fta.append(i[0])
-if fta == "on":
+if fta[0].lower() == "on":
     filterThere = 1
 else:
     filterThere = 0
-brandExist = bea[0]
+try:
+    brandExist = bea[0]
+except:
+    brandExist = 0
 
 # A typical amazon website broken in 3 parts:
 # https://www.amazon.in/s?k= biscuit &page=2
@@ -173,21 +179,22 @@ sheet = excel.active
 sheet.append(
     ["Platform", "Date", "Category (Keyword)", "Brand name", "Product Name", "Rating", "Reviews", "Discount", "Size",
      "Price/g", "Actual price", "Offer price", "Delivery Date", "Page Number", "Item Number"])
-     
+
 # totalPages = soupExtract(site,'cream biscuit')
 # for i in range(2, int(total_pages) + 1):
 
 if not brandExist:
     for keyword in keywords:
-
-        total_pages = soupExtract(site, keyword, 1, filterThere)         # brand
+        total_pages = soupExtract(site, keyword, 1, filterThere)  # brand
         i = 1
         while i != total_pages:
-            i = i+1
+            i = i + 1
             try:
-                soupExtract(site, keyword, i, filterThere)               # brand
+                soupExtract(site, keyword, i, filterThere)  # brand
             except:
                 pass
+    # saving the excel file
+    excel.save(f"{keyword}.xlsx")
 else:
     for keyword in keywords:
         total_pages = soupExtract(site, keyword, 1, filterThere, brandExist)  # brand
@@ -198,5 +205,5 @@ else:
                 soupExtract(site, keyword, i, filterThere, brandExist)  # brand
             except:
                 pass
-# saving the excel file
-excel.save("Data2.xlsx")
+    # saving the excel file
+    excel.save(f"{keyword}.xlsx")
